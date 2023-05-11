@@ -54,9 +54,29 @@ async function updateUser(id, fields = {}) {
     }
 }
 
+async function createPost({
+    authorId,
+    title,
+    content
+}) {
+    try {
+        const { rows: [ post ] } = await client.query(`
+            INSERT INTO posts(authorId, title, content)
+            VALUES ($1, $2, $3)
+            ON CONFLICT (title, content) DO NOTHING
+            RETURNING *;
+        `, [authorId, title, content]);
+
+        return post;
+    } catch (error) {
+        throw error;
+    }
+}
+
 module.exports = {
     client,
     getAllUsers,
     createUser,
-    updateUser
+    updateUser,
+    createPost
 }
