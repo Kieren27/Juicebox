@@ -10,6 +10,7 @@ const {
       console.log("Starting to drop tables...");
   
       await client.query(`
+        DROP TABLE IF EXISTS posts;
         DROP TABLE IF EXISTS users;
       `);
   
@@ -85,10 +86,11 @@ const {
     try {
       console.log("Starting to test database...");
   
+      console.log("Calling getAllUsers")
       const users = await getAllUsers();
-      console.log("getAllUsers:", users);
-
-      console.log("Calling updateUser on users[0]");
+      console.log("Result:", users);
+  
+      console.log("Calling updateUser on users[0]")
       const updateUserResult = await updateUser(users[0].id, {
         name: "Newname Sogood",
         location: "Lesterville, KY"
