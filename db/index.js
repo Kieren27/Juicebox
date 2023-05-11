@@ -91,9 +91,9 @@ async function updatePost(id, fields = {}) {
         const {rows: [ post ]} = await client.query(`
         UPDATE users
         SET ${ setString }
-        WHERE id=${ key }
+        WHERE id=${ id }
         RETURNING *;
-        `, [...Object.values(fields), id]);
+        `, Object.values(fields));
 
         return post;
     } catch (error) {
@@ -114,6 +114,19 @@ async function getAllPosts() {
     }
 }
 
+async function getPostsByUser(userId) {
+    try {
+        const { rows } = await client.query(`
+        SELECT * FROM posts
+        WHERE "authorId"=$1;
+        `, [userId]);
+
+        return rows;
+    } catch (error) {
+        throw error;
+    }
+}
+
 module.exports = {
     client,
     getAllUsers,
@@ -121,5 +134,6 @@ module.exports = {
     updateUser,
     createPost,
     updatePost,
-    getAllPosts
+    getAllPosts,
+    getPostsByUser,
 }
