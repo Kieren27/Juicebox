@@ -40,7 +40,7 @@ const {
           title varchar(255) NOT NULL,
           content TEXT NOT NULL,
           active BOOLEAN DEFAULT true
-        )
+        );
       `);
   
       console.log("Finished building tables!");
