@@ -38,7 +38,7 @@ async function updateUser(id, fields = {}) {
         SET ${setString}
         WHERE id=${id}
         RETURNING *;
-      `, Object.values(fields));
+      `, [...Object.values(fields)]);
 
     return user;
   } catch (error) {
