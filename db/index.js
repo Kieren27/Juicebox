@@ -112,7 +112,7 @@ async function updatePost(id, fields = {}) {
         SET ${setString}
         WHERE id=${id}
         RETURNING *;
-        `, Object.values(fields));
+        `, [...Object.values(fields)]);
 
     return post;
   } catch (error) {
