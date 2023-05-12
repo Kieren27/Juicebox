@@ -146,6 +146,35 @@ async function getPostsByUser(userId) {
   }
 }
 
+async function createTags(tagList) {
+  if (tagList.length === 0) {
+    return;
+  }
+
+  const insertValues = tagList.map(
+    (_, index) => `$${index + 1}`).join('), (');
+
+  const selectValues = taglist.map(
+    (_, index) => `$${index + 1}`).join(', ');
+
+  try {
+      await client.query(`
+      INSERT INTO tags(name)
+      VALUES (${insertValues})
+      ON CONFLICT (name) DO NOTHING;
+    `, tagList);
+
+    const { rows } = await client.query(`
+      SELECT * FROM tags
+      WHERE name IN (${selectValues});
+    `, tagList);
+
+    return rows;
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports = {
   client,
   createUser,
@@ -155,5 +184,6 @@ module.exports = {
   createPost,
   updatePost,
   getAllPosts,
-  getPostsByUser
+  getPostsByUser,
+  createTags
 }
