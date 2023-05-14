@@ -82,7 +82,8 @@ async function getUserById(userId) {
 async function createPost({
   authorId,
   title,
-  content
+  content,
+  tags = []
 }) {
   try {
     const { rows: [post] } = await client.query(`
@@ -91,7 +92,9 @@ async function createPost({
             RETURNING *;
         `, [authorId, title, content]);
 
-    return post;
+    const tagList = await createTags(tags);
+
+    return await addTagsToPost(post.id, tagList);
   } catch (error) {
     throw error;
   }
