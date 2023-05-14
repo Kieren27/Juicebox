@@ -38,7 +38,7 @@ async function updateUser(id, fields = {}) {
         SET ${setString}
         WHERE id=${id}
         RETURNING *;
-      `, [...Object.values(fields)]);
+      `, Object.values(fields));
 
     return user;
   } catch (error) {
@@ -100,24 +100,44 @@ async function createPost({
   }
 }
 
-async function updatePost(id, fields = {}) {
+async function updatePost(postId, fields = {}) {
+  const { tags } = fields;
+  delete fields.tags;
+
   const setString = Object.keys(fields).map(
     (key, index) => `"${key}"=$${index + 1}`
   ).join(', ');
 
-  if (setString.length === 0) {
-    return;
-  }
-
   try {
-    const { rows: [post] } = await client.query(`
-        UPDATE posts
-        SET ${setString}
-        WHERE id=${id}
-        RETURNING *;
-        `, [...Object.values(fields)]);
 
-    return post;
+    if (setString.length > 0) {
+      await client.query(`
+      UPDATE posts
+      SET ${ setString }
+      WHERE id=${ postId }
+      RETURNING *;
+      `, Object.values(fields));
+    }
+
+    if (tags === undefined) {
+      return await getPostById(postId);
+    }
+
+    const tagList = await createTags(tags);
+    const tagListIdString = tagList.map(
+      tag => `${ tag.id }`
+    ).join(', ');
+
+    await client.query(`
+      DELETE FROM post_tags
+      WHERE "tagId"
+      NOT IN (${ tagListIdString })
+      AND "postId"=$1;
+    `, [postId]);
+
+    await addTagsToPost(postId, tagList);
+
+    return await getPostById(postId);
   } catch (error) {
     throw error;
   }
@@ -165,7 +185,7 @@ async function createTags(tagList) {
   const insertValues = tagList.map(
     (_, index) => `$${index + 1}`).join('), (');
 
-  const selectValues = taglist.map(
+  const selectValues = tagList.map(
     (_, index) => `$${index + 1}`).join(', ');
 
   try {
@@ -217,7 +237,7 @@ async function getPostById(postId) {
     const { rows: [ post ] } = await client.query(`
       SELECT * FROM posts
       WHERE id=$1;
-    `, postId);
+    `, [postId]);
 
     const { rows: tags } = await client.query(`
       SELECT  tags.* FROM tags
@@ -252,8 +272,6 @@ module.exports = {
   updatePost,
   getAllPosts,
   getPostsByUser,
-  createTags,
   createPostTag,
-  addTagsToPost,
   getPostById
 }
