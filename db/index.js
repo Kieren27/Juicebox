@@ -122,12 +122,16 @@ async function updatePost(id, fields = {}) {
 
 async function getAllPosts() {
   try {
-    const { rows } = await client.query(`
-            SELECT *
+    const { rows: postIds } = await client.query(`
+            SELECT id
             FROM posts;
         `);
 
-    return rows;
+        const posts = await Promise.all(postIds.map(
+          post => getPostById( post.id )
+        ));
+    
+        return posts;
   } catch (error) {
     throw error;
   }
