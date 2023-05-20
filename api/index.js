@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const { getUserById } = require('../db');
 const { JWT_SECRET } = process.env;
 
-apiRouter.use(async (req, res, next) => {
+apiRouter.use(async (req, _res, next) => {
     const prefix = 'Bearer ';
     const auth = req.header('Authorization');
 
@@ -40,5 +40,12 @@ apiRouter.use('/posts', postsRouter);
 
 const tagsRouter = require('./tags');
 apiRouter.use('/tags', tagsRouter);
+
+apiRouter.use((error, _req, res, _next) => {
+    res.send({
+        name: error.name,
+        message: error.message
+    });
+});
 
 module.exports = apiRouter;
