@@ -3,18 +3,18 @@ const postsRouter = express.Router();
 
 const { requireUser } = require('./utils');
 
-postsRouter.use((req, res, next) => {
-    console.log("A request is being made to /posts");
-
-    next();
-});
-
 const {
     getAllPosts,
     createPost,
     updatePost,
     getPostById
 } = require('../db');
+
+postsRouter.use((req, res, next) => {
+    console.log("A request is being made to /posts");
+
+    next();
+});
 
 postsRouter.get('/', async (req, res, next) => {
     try {
